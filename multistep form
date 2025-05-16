@@ -1,0 +1,126 @@
+import { useEffect, useState } from "react";
+import "./styles.css";
+
+type FormDataType = {
+  firstName?: string;
+  lastName?: string;
+  mobileNumber?: number;
+  emailId?: string;
+  userName?: string;
+  city?: string;
+};
+
+export default function App() {
+  const [formdata, setFormdata] = useState<FormDataType>({});
+  const [step, setStep] = useState(1);
+
+  const clearForm = () => {
+    setStep(1);
+    setFormdata({});
+    localStorage.removeItem("formData");
+    localStorage.removeItem("step");
+    localStorage.removeItem("time");
+  };
+
+  useEffect(() => {
+    const storeData = localStorage.getItem("formData");
+    const storeStep = localStorage.getItem("step");
+    const time = localStorage.getItem("time");
+    const currentTime = new Date().getTime();
+    if (time && currentTime <= parseInt(time)) {
+      if (storeStep && storeData) {
+        setFormdata(JSON.parse(storeData));
+        setStep(parseInt(storeStep));
+      }
+    } else {
+      localStorage.removeItem("formData");
+      localStorage.removeItem("step");
+      localStorage.removeItem("time");
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("formData", JSON.stringify(formdata));
+    localStorage.setItem("step", `${step}`);
+    const expiryTime = new Date().getTime() + 24 * 60 * 60 * 1000;
+    localStorage.setItem("time", `${expiryTime}`);
+  }, [step]);
+
+  return (
+    <div className="App">
+      <form id="form">
+        {step === 1 && (
+          <>
+            <label className="label">First name</label>
+            <input
+              type="text"
+              value={formdata.firstName || ""}
+              onChange={(e) =>
+                setFormdata({ ...formdata, firstName: e.target.value })
+              }
+            />
+            <label className="label">Last name</label>
+            <input
+              type="text"
+              value={formdata.lastName || ""}
+              onChange={(e) =>
+                setFormdata({ ...formdata, lastName: e.target.value })
+              }
+            />
+            <button onClick={() => setStep(2)}>Next</button>
+            <button onClick={() => clearForm()}>Reset</button>
+          </>
+        )}
+        {step === 2 && (
+          <>
+            <label className="label">Mobile Number</label>
+            <input
+              type="number"
+              value={formdata.mobileNumber || ""}
+              onChange={(e) =>
+                setFormdata({
+                  ...formdata,
+                  mobileNumber: parseInt(e.target.value),
+                })
+              }
+            />
+            <label className="label">Email Id</label>
+            <input
+              type="text"
+              value={formdata.emailId || ""}
+              onChange={(e) =>
+                setFormdata({ ...formdata, emailId: e.target.value })
+              }
+            />
+            <button onClick={() => setStep(1)}>Previous</button>
+            <button onClick={() => setStep(3)}>Next</button>
+            <button onClick={() => clearForm()}>Reset</button>
+          </>
+        )}
+        {step === 3 && (
+          <>
+            <label className="label">Username</label>
+            <input
+              type="text"
+              value={formdata.userName || ""}
+              onChange={(e) =>
+                setFormdata({ ...formdata, userName: e.target.value })
+              }
+            />
+            <label className="label">City</label>
+            <input
+              type="text"
+              value={formdata.city || ""}
+              onChange={(e) =>
+                setFormdata({ ...formdata, city: e.target.value })
+              }
+            />
+            <button onClick={() => setStep(2)}>Previous</button>
+            <button onClick={() => {}}>Submit</button>
+            <button onClick={() => clearForm()}>Reset</button>
+          </>
+        )}
+      </form>
+    </div>
+  );
+}
